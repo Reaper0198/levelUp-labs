@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 
 const { UserModel, CourseModel, PurchaseModel } = require('./db')
-const { auth, generateToken } = require('./auth')
+const { generateToken, adminAuth, auth } = require('./auth')
 
 const adminRouter = express.Router();
 
@@ -65,7 +65,10 @@ adminRouter.post('/signin', async (req, res) => {
 
         if (matchPassword) {
 
-            const token = generateToken(admin._id);
+            const token = generateToken({
+                id :admin._id,
+                role : admin.role
+            });
 
             res.status(200).send({
                 success: true,
@@ -89,6 +92,37 @@ adminRouter.post('/signin', async (req, res) => {
     }
 
 
+
+})
+
+adminRouter.post('/create', auth, adminAuth,  async (req, res) => {
+    const name = req.body.name;
+    const description = req.body.description;
+    const authorId = req.userId;
+    // console.log("authorId " ,authorId)
+    // console.log("req Id " ,req.userId)
+
+    try{
+        const newCourse = new CourseModel({
+            name,
+            description,
+            authorId
+        })
+
+        await newCourse.save();
+
+        res.status(201).send({
+            success : true,
+            message : 'new course created successfully'
+        })
+
+    }catch(err){
+        console.log(err);
+        res.status(500).send({
+            success : false,
+            message : 'could not create new course, backend error'
+        })
+    }
 
 })
 

@@ -32,9 +32,13 @@ const Course = new Schema({
         type : String,
         required : true,
     },
-    author : {
-        type : String,
+    authorId : {
+        type : ObjectId,
         required : true
+    },
+    createdOn :{
+        type : Date,
+        default : Date.now
     }
 })
 

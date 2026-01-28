@@ -59,7 +59,10 @@ userRouter.post('/signin', async (req, res) =>{
         const matchPassword = await bcrypt.compare(password, user.password);
 
         if(matchPassword){
-            const token = generateToken(user._id);
+            const token = generateToken({
+                id : user._id,
+                role : user.role
+            });
 
             res.status(200).send({
                 success : true,

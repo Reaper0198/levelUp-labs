@@ -1,6 +1,5 @@
 const express = require('express')
 const mongoose = require('mongoose')
-const bcrypt = require('bcrypt')
 const dotenv = require('dotenv')
 
 const adminRouter = require('./adminRouter');
@@ -15,6 +14,7 @@ mongoose.connect(process.env.MONGOOSE_URI)
 const app = express();
 app.use(express.json());
 
+// Router endpoints
 app.use('/admin', adminRouter);
 app.use('/', userRouter);
 
