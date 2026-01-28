@@ -1,0 +1,95 @@
+const express = require('express');
+const bcrypt = require('bcrypt');
+
+const { UserModel, CourseModel, PurchaseModel } = require('./db')
+const { auth, generateToken } = require('./auth')
+
+const adminRouter = express.Router();
+
+adminRouter.post('/signup', async (req, res) => {
+    const username = req.body.username;
+    const email = req.body.email;
+    const password = req.body.password;
+    const role = 'admin';
+
+    try{
+        const hashedPassword = await bcrypt.hash(password, 5);
+
+        const newAdmin = new UserModel({
+            username,
+            email,
+            role,
+            password : hashedPassword
+        })
+
+        await newAdmin.save()
+
+        res.status(201).send({
+            success : true,
+            message : 'new admin created successfully'
+        })
+    }catch(err){
+        console.log(err);
+        res.status(500).send({
+            success : false,
+            message : 'could not create new admin, backend error'
+        })
+    }
+})
+
+adminRouter.post('/signin', async (req, res) => {
+
+    const email = req.body.email;
+    const password = req.body.password;
+
+    try {
+        const admin = await UserModel.findOne({ email });
+
+        if(!admin){
+            res.status(400).send({
+                success : false,
+                message : 'no such user exist'
+            })
+            return;
+        }
+
+        if(admin.role === 'user'){
+            res.status(401).send({
+                success : false,
+                message : 'unauthorised user'
+            })
+            return;
+        }
+
+        const matchPassword = await bcrypt.compare(password, admin.password);
+
+        if (matchPassword) {
+
+            const token = generateToken(admin._id);
+
+            res.status(200).send({
+                success: true,
+                message: 'welcome back admin',
+                authentication: `${"Bearer " + token}`
+            })
+        } else {
+            res.status(400).send({
+                success: false,
+                message: 'passwod mismatch'
+            })
+        }
+
+    } catch (err) {
+        console.log(err);
+
+        res.status(500).send({
+            success: false,
+            message: 'could sign in, backend error'
+        })
+    }
+
+
+
+})
+
+module.exports = adminRouter;

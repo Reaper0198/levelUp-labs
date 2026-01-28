@@ -46,6 +46,11 @@ const Purchase = new Schema({
     userId : {
         type : ObjectId,
         require : true
+    },
+    purchaseDate : {
+        type : Date,
+        default : Date.now,
+        required : true
     }
 })
 

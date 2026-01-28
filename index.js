@@ -5,6 +5,7 @@ const dotenv = require('dotenv')
 
 const { UserModel, CourseModel, PurchaseModel } = require('./db')
 const { auth, generateToken } = require('./auth')
+const adminRouter = require('./adminRouter')
 
 dotenv.config();
 
@@ -15,44 +16,46 @@ mongoose.connect(process.env.MONGOOSE_URI)
 const app = express();
 app.use(express.json());
 
-app.post('/admin/signin', async (req, res) => {
+app.use('/admin', adminRouter);
 
-    const email = req.body.email;
-    const password = req.body.password;
+// app.post('/admin/signin', async (req, res) => {
 
-    try {
-        const admin = await UserModel.findOne({ email });
+//     const email = req.body.email;
+//     const password = req.body.password;
 
-        const matchPassword = await bcrypt.compare(password, admin.password);
+//     try {
+//         const admin = await UserModel.findOne({ email });
 
-        if (matchPassword) {
+//         const matchPassword = await bcrypt.compare(password, admin.password);
 
-            const token = generateToken(admin._id);
+//         if (matchPassword) {
 
-            res.status(200).send({
-                success: true,
-                message: 'welcome back admin',
-                authentication: `${"Bearer " + token}`
-            })
-        } else {
-            res.status(400).send({
-                success: false,
-                message: 'passwod mismatch'
-            })
-        }
+//             const token = generateToken(admin._id);
 
-    } catch (err) {
-        console.log(err);
+//             res.status(200).send({
+//                 success: true,
+//                 message: 'welcome back admin',
+//                 authentication: `${"Bearer " + token}`
+//             })
+//         } else {
+//             res.status(400).send({
+//                 success: false,
+//                 message: 'passwod mismatch'
+//             })
+//         }
 
-        res.status(500).send({
-            success: false,
-            message: 'could sign in, backend error'
-        })
-    }
+//     } catch (err) {
+//         console.log(err);
+
+//         res.status(500).send({
+//             success: false,
+//             message: 'could sign in, backend error'
+//         })
+//     }
 
 
 
-})
+// })
 
 app.post('/signup', async (req, res) => {
 
@@ -129,6 +132,8 @@ app.post('/signin', async (req, res) =>{
     }
 
 })
+
+// app.post('/course/buy')
 
 
 app.listen(3000, () => {
