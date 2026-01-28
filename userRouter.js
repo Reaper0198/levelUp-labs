@@ -6,7 +6,7 @@ const { auth, generateToken } = require('./auth')
 
 const userRouter = express.Router();
 
-
+// create a new account
 userRouter.post('/signup', async (req, res) => {
 
     const username = req.body.username;
@@ -41,6 +41,7 @@ userRouter.post('/signup', async (req, res) => {
     }
 })
 
+// sign in with existing account and get authorization token
 userRouter.post('/signin', async (req, res) =>{
     const email = req.body.email;
     const password = req.body.password;
@@ -85,7 +86,6 @@ userRouter.post('/signin', async (req, res) =>{
     }
 
 })
-
 
 
 module.exports = userRouter;

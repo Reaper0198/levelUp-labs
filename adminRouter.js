@@ -6,6 +6,7 @@ const { generateToken, adminAuth, auth } = require('./auth')
 
 const adminRouter = express.Router();
 
+// create new admin account
 adminRouter.post('/signup', async (req, res) => {
     const username = req.body.username;
     const email = req.body.email;
@@ -37,6 +38,7 @@ adminRouter.post('/signup', async (req, res) => {
     }
 })
 
+// sign in with existing admin account and get authorization token
 adminRouter.post('/signin', async (req, res) => {
 
     const email = req.body.email;
@@ -95,6 +97,7 @@ adminRouter.post('/signin', async (req, res) => {
 
 })
 
+// signed in admin can create a new course
 adminRouter.post('/create', auth, adminAuth,  async (req, res) => {
     const name = req.body.name;
     const description = req.body.description;
