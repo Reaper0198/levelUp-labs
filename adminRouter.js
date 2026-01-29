@@ -151,22 +151,37 @@ adminRouter.get('/course', auth, adminAuth, async (req, res) => {
 })
 
 // admin can update the course details by passing all the course
-adminRouter.put('/course/update/:id', auth, adminAuth, async (req, res) => {
+adminRouter.put('/course/update/:courseId', auth, adminAuth, async (req, res) => {
     const adminId = req.userId;
+    const courseId = req.params.courseId;
     const name = req.body.name;
     const description = req.body.description;
 
     try{
-        await CourseModel.replaceOne({authorId : adminId}, {
-            name : name,
-            description : description,
-            authorId : adminId
-        })
+        const course = await CourseModel.findOne({_id : courseId});
+        // find the way to update the course using the instance created in above db call.
+        if(course){
 
-        res.status(200).send({
-            success : true,
-            message : 'course details updated successfully'
-        })
+            course.name = name;
+            course.description = description;
+
+            await course.save();
+
+            res.status(200).send({
+                success : true,
+                message : 'course details updated successfully'
+            })
+
+        }else{
+            res.status(400).send({
+                success : false,
+                message : "no such course exist"
+            })
+
+        }
+
+
+
 
     }catch(err){
         console.log(err);

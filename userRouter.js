@@ -87,5 +87,74 @@ userRouter.post('/signin', async (req, res) =>{
 
 })
 
+// user can purchase a course and new entry is made to purchase document
+// user can buy the same course more than once currently.
+userRouter.post('/purchase/:courseId', auth, async(req, res) => {
+    const userId = req.userId;
+    const courseId = req.params.courseId;
+
+    try{
+
+        const course = await CourseModel.findOne({_id : courseId}).select('_id');
+
+        if(course){
+
+            const newPurchase = new PurchaseModel({
+                userId,
+                courseId
+            })
+    
+            await newPurchase.save();
+
+            res.status(200).send({
+                success : true,
+                message : 'purchase saved successfully'
+            })
+
+        }else{
+            res.status(400).send({
+                success : false,
+                message : "no such course exist"
+            })
+
+        }
+    }catch(err){
+        console.log(err)
+
+        res.status(500).send({
+            success : false,
+            message : 'could not save the purchase, backend error'
+        })
+    }
+})
+
+
+// user can get the array of all the courses id they have bought
+userRouter.get('/courses', auth, async (req, res) => {
+    const userId = req.userId;
+    try{
+        const courses = await PurchaseModel.find({userId : userId});
+
+        if(courses){
+            res.status(200).send({
+                success : true,
+                message : 'all courses fetched',
+                payload : courses
+            })
+        }else{
+            res.status(200).send({
+                success : true,
+                message : 'No courses bought yet'
+            })
+        }
+    }catch(err){
+        console.log(err);
+        res.status(500).send({
+            success : false,
+            message : 'could not fetch the courses, backed error'
+        })
+    }
+})
+
 
 module.exports = userRouter;
