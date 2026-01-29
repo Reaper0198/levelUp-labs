@@ -98,7 +98,7 @@ adminRouter.post('/signin', async (req, res) => {
 })
 
 // signed in admin can create a new course
-adminRouter.post('/create', auth, adminAuth,  async (req, res) => {
+adminRouter.post('/course/create', auth, adminAuth,  async (req, res) => {
     const name = req.body.name;
     const description = req.body.description;
     const authorId = req.userId;
@@ -127,6 +127,27 @@ adminRouter.post('/create', auth, adminAuth,  async (req, res) => {
         })
     }
 
+})
+
+// admin can see all the courses they have created
+adminRouter.get('/course', auth, adminAuth, async (req, res) => {
+    const adminId = req.userId;
+
+    try{
+        const cousrses= await CourseModel.find({ authorId : adminId })
+
+        res.status(200).send({
+            success : true,
+            message : 'All courses retrieved',
+            payload : cousrses
+        })
+    }catch(err){
+        console.log(err);
+        res.status(500).send({
+            success : false,
+            message : 'could not retrive all courses, backend error'
+        })
+    }
 })
 
 module.exports = adminRouter;
