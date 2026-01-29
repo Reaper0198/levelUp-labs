@@ -150,4 +150,30 @@ adminRouter.get('/course', auth, adminAuth, async (req, res) => {
     }
 })
 
+adminRouter.put('/course/update/:id', auth, adminAuth, async (req, res) => {
+    const adminId = req.userId;
+    const name = req.body.name;
+    const description = req.body.description;
+
+    try{
+        await CourseModel.findOne({authorId : adminId}, {
+            name : name,
+            description : description,
+            authorId : adminId
+        })
+
+        res.status(200).send({
+            success : true,
+            message : 'course details updated successfully'
+        })
+
+    }catch(err){
+        console.log(err);
+        res.status(500).send({
+            success : false,
+            message : 'could not updated the course, backend error'
+        })
+    }
+})
+
 module.exports = adminRouter;
