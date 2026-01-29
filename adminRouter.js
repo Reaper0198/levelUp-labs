@@ -150,13 +150,14 @@ adminRouter.get('/course', auth, adminAuth, async (req, res) => {
     }
 })
 
+// admin can update the course details by passing all the course
 adminRouter.put('/course/update/:id', auth, adminAuth, async (req, res) => {
     const adminId = req.userId;
     const name = req.body.name;
     const description = req.body.description;
 
     try{
-        await CourseModel.findOne({authorId : adminId}, {
+        await CourseModel.replaceOne({authorId : adminId}, {
             name : name,
             description : description,
             authorId : adminId
@@ -174,6 +175,30 @@ adminRouter.put('/course/update/:id', auth, adminAuth, async (req, res) => {
             message : 'could not updated the course, backend error'
         })
     }
+})
+
+// admin can delete the course using course id.
+adminRouter.delete('/course/delete/:id', auth, adminAuth, async (req, res) => {
+    const courseId = req.params.id;
+
+    try{
+
+        await CourseModel.findByIdAndDelete({_id : courseId})
+
+        res.status(200).send({
+            success : true,
+            message : 'course deleted successfully'
+        })
+
+    }catch(err){
+        console.log(err);
+        res.status(500).send({
+            success : false,
+            message : 'could not delete the course, backend error'
+        })
+    }
+
+
 })
 
 module.exports = adminRouter;
