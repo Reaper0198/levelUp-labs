@@ -87,7 +87,7 @@ userRouter.post('/signin', async (req, res) =>{
 
 })
 
-// user can purchase a course and new entry is made to purchase document
+// On purchasing a course, new entry is made to purchase document
 // user can buy the same course more than once currently.
 userRouter.post('/purchase/:courseId', auth, async(req, res) => {
     const userId = req.userId;
@@ -130,7 +130,7 @@ userRouter.post('/purchase/:courseId', auth, async(req, res) => {
 
 
 // user can get the array of all the courses id they have bought
-userRouter.get('/courses', auth, async (req, res) => {
+userRouter.get('/purchased-courses', auth, async (req, res) => {
     const userId = req.userId;
     try{
         const courses = await PurchaseModel.find({userId : userId});
@@ -152,6 +152,27 @@ userRouter.get('/courses', auth, async (req, res) => {
         res.status(500).send({
             success : false,
             message : 'could not fetch the courses, backed error'
+        })
+    }
+})
+
+// get all the courses available
+userRouter.get('/courses', auth, async (req, res) => {
+    
+    try{
+        const courses = await CourseModel.find({});
+
+        res.status(200).send({
+            success : true,
+            message : 'all courses fetched successfully',
+            payload : courses
+        })
+    }catch(err){
+        console.log(err);
+
+        res.status(500).send({
+            success : false,
+            message : 'could not fetch the courses, backend error'
         })
     }
 })
