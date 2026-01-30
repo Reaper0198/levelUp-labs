@@ -1,8 +1,8 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 
-const { UserModel, CourseModel, PurchaseModel } = require('./db')
-const { generateToken, adminAuth, auth } = require('./auth')
+const { UserModel, CourseModel } = require('../db')
+const { generateAdminToken, adminRoleAuth, adminAuth } = require('../auth')
 
 const adminRouter = express.Router();
 
@@ -67,7 +67,7 @@ adminRouter.post('/signin', async (req, res) => {
 
         if (matchPassword) {
 
-            const token = generateToken({
+            const token = generateAdminToken({
                 id :admin._id,
                 role : admin.role
             });
@@ -97,8 +97,11 @@ adminRouter.post('/signin', async (req, res) => {
 
 })
 
+// run adminAuth, adminRoleAuth before every below endpoints are hit.
+adminRouter.use(adminAuth, adminRoleAuth);
+
 // signed in admin can create a new course
-adminRouter.post('/course/create', auth, adminAuth,  async (req, res) => {
+adminRouter.post('/course/create',  async (req, res) => {
     const name = req.body.name;
     const description = req.body.description;
     const authorId = req.userId;
@@ -130,7 +133,7 @@ adminRouter.post('/course/create', auth, adminAuth,  async (req, res) => {
 })
 
 // admin can see all the courses they have created
-adminRouter.get('/course', auth, adminAuth, async (req, res) => {
+adminRouter.get('/course', async (req, res) => {
     const adminId = req.userId;
 
     try{
@@ -151,14 +154,14 @@ adminRouter.get('/course', auth, adminAuth, async (req, res) => {
 })
 
 // admin can update the course details by passing all the course
-adminRouter.put('/course/update/:courseId', auth, adminAuth, async (req, res) => {
+adminRouter.put('/course/update/:courseId', async (req, res) => {
     const adminId = req.userId;
     const courseId = req.params.courseId;
     const name = req.body.name;
     const description = req.body.description;
 
     try{
-        const course = await CourseModel.findOne({_id : courseId});
+        const course = await CourseModel.findOne({_id : courseId, authorId : adminId});
         // find the way to update the course using the instance created in above db call.
         if(course){
 
@@ -193,7 +196,7 @@ adminRouter.put('/course/update/:courseId', auth, adminAuth, async (req, res) =>
 })
 
 // admin can delete the course using course id.
-adminRouter.delete('/course/delete/:id', auth, adminAuth, async (req, res) => {
+adminRouter.delete('/course/delete/:id', async (req, res) => {
     const courseId = req.params.id;
 
     try{

@@ -31,8 +31,15 @@ const Course = new Schema({
         type : String,
         required : true,
     },
+    thumbnailUrl : {
+        type : String
+    },
     authorId : {
         type : ObjectId,
+        required : true
+    },
+    price : {
+        type : Number,
         required : true
     },
     createdOn :{

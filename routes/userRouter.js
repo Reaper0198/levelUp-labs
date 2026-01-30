@@ -1,8 +1,8 @@
 const express = require('express')
 const bcrypt = require('bcrypt');
 
-const { UserModel, CourseModel, PurchaseModel } = require('./db')
-const { auth, generateToken } = require('./auth')
+const { UserModel, CourseModel, PurchaseModel } = require('../db')
+const { userAuth, generateUserToken } = require('../auth')
 
 const userRouter = express.Router();
 
@@ -60,7 +60,7 @@ userRouter.post('/signin', async (req, res) =>{
         const matchPassword = await bcrypt.compare(password, user.password);
 
         if(matchPassword){
-            const token = generateToken({
+            const token = generateUserToken({
                 id : user._id,
                 role : user.role
             });
@@ -87,9 +87,12 @@ userRouter.post('/signin', async (req, res) =>{
 
 })
 
+// run userAuth middleware before any below endpoint is hit.
+userRouter.use(userAuth);
+
 // On purchasing a course, new entry is made to purchase document
 // user can buy the same course more than once currently.
-userRouter.post('/purchase/:courseId', auth, async(req, res) => {
+userRouter.post('/purchase/:courseId', async(req, res) => {
     const userId = req.userId;
     const courseId = req.params.courseId;
 
@@ -128,9 +131,8 @@ userRouter.post('/purchase/:courseId', auth, async(req, res) => {
     }
 })
 
-
 // user can get the array of all the courses id they have bought
-userRouter.get('/purchased-courses', auth, async (req, res) => {
+userRouter.get('/purchased-courses', async (req, res) => {
     const userId = req.userId;
     try{
         const courses = await PurchaseModel.find({userId : userId});
@@ -157,7 +159,7 @@ userRouter.get('/purchased-courses', auth, async (req, res) => {
 })
 
 // get all the courses available
-userRouter.get('/courses', auth, async (req, res) => {
+userRouter.get('/courses', async (req, res) => {
     
     try{
         const courses = await CourseModel.find({});
